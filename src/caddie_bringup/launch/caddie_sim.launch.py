@@ -161,8 +161,8 @@ def generate_launch_description():
             'use_unitree_sport_bridge', default_value='false',
             description='Bridge /cmd_vel to official Unitree /api/sport/request messages'),
         DeclareLaunchArgument(
-            'use_leg_animation', default_value='false',
-            description='Enable experimental visible Go2 leg gait animation'),
+            'use_leg_animation', default_value='true',
+            description='Enable visible, surface-aware Go2 leg gait animation'),
         DeclareLaunchArgument(
             'detector_backend', default_value='auto',
             description='auto, yolo, or opencv'),

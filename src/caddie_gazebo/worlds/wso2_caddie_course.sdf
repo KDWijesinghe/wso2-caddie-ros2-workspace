@@ -107,6 +107,58 @@
       </link>
     </model>
 
+    <model name="fairway_mound">
+      <static>true</static>
+      <pose>-3.5 -1.2 0.035 0 0.012 0.05</pose>
+      <link name="mound_link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>8.0 4.0 0.035</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>8.0 4.0 0.035</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.14 0.40 0.11 1</ambient>
+            <diffuse>0.18 0.53 0.14 1</diffuse>
+            <specular>0.03 0.05 0.03 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="rough_grass_strip">
+      <static>true</static>
+      <pose>-5.0 4.7 0.018 0 0 0.20</pose>
+      <link name="rough_link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>10.0 2.6 0.035</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>10.0 2.6 0.035</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.10 0.31 0.08 1</ambient>
+            <diffuse>0.14 0.43 0.10 1</diffuse>
+            <specular>0.02 0.03 0.02 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+
     <model name="left_bunker">
       <static>true</static>
       <pose>4 7 0.01 0 0 -0.25</pose>

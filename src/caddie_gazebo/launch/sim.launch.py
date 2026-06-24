@@ -34,6 +34,14 @@ def generate_launch_description():
         "'revolute' if '", use_leg_animation,
         "'.lower() == 'true' else 'fixed'",
     ])
+    use_leg_collision = PythonExpression([
+        "'false' if '", use_leg_animation,
+        "'.lower() == 'true' else 'true'",
+    ])
+    leg_mass_scale = PythonExpression([
+        "'0.02' if '", use_leg_animation,
+        "'.lower() == 'true' else '1.0'",
+    ])
 
     robot_description = ParameterValue(
         Command([
@@ -41,6 +49,8 @@ def generate_launch_description():
             ' use_gazebo:=true',
             ' leg_joint_type:=', leg_joint_type,
             ' use_leg_control:=', use_leg_animation,
+            ' use_leg_collision:=', use_leg_collision,
+            ' leg_mass_scale:=', leg_mass_scale,
         ]),
         value_type=str,
     )
@@ -120,7 +130,13 @@ def generate_launch_description():
         executable='go2_gait_animator',
         name='go2_gait_animator',
         output='screen',
-        parameters=[{'use_sim_time': use_sim_time}],
+        parameters=[{
+            'use_sim_time': use_sim_time,
+            'odom_topic': '/odom',
+            'imu_topic': '/imu',
+            'course_origin_x': -15.0,
+            'course_origin_y': -7.0,
+        }],
         condition=IfCondition(use_leg_animation),
     )
 
@@ -186,8 +202,8 @@ def generate_launch_description():
             'gui', default_value='true',
             description='Start Gazebo with GUI'),
         DeclareLaunchArgument(
-            'use_leg_animation', default_value='false',
-            description='Enable experimental visible Go2 leg gait animation'),
+            'use_leg_animation', default_value='true',
+            description='Enable visible, surface-aware Go2 leg gait animation'),
         AppendEnvironmentVariable(
             name='GZ_SIM_RESOURCE_PATH',
             value=go2_resource_path,

@@ -112,7 +112,7 @@ ros2 launch caddie_bringup caddie_sim.launch.py detector_backend:=opencv
 ros2 launch caddie_bringup caddie_sim.launch.py yolo_model:=/path/to/golf_ball_yolo.pt
 ros2 launch caddie_bringup caddie_sim.launch.py use_voice:=true
 ros2 launch caddie_bringup caddie_sim.launch.py use_unitree_sport_bridge:=true
-ros2 launch caddie_bringup caddie_sim.launch.py use_leg_animation:=true
+ros2 launch caddie_bringup caddie_sim.launch.py use_leg_animation:=false
 ```
 
 ## Test Commands
@@ -148,25 +148,36 @@ ros2 topic echo /go2/gait_status
 The default URDF/Xacro is based on the official Unitree Go2 description. For
 robust Nav2 simulation it uses hidden tiny drive wheels under the body and
 Gazebo's diff-drive system plugin to consume `/cmd_vel` and publish `/odom`.
-By default, the visible Go2 leg joints are fixed because the hand-made Gazebo
-leg animation can destabilize the robot and make it fall. This is the stable
-mode to use for Nav2, SLAM, perception, and caddie behavior testing.
+By default, the visible Go2 legs are animated through `gz_ros2_control` while
+the hidden wheels remain responsible for stable odometry and base movement.
+The animated leg links are visual-only in Gazebo, so their moving feet do not
+strike the ground and tip the robot over.
 
-An experimental leg animation mode is available:
+The gait animator subscribes to `/cmd_vel`, `/odom`, and `/imu`. It changes
+stride length, step frequency, stance width, and foot lift for the course
+surface under the robot:
+
+- fairway: normal trot
+- green: short, gentle steps
+- tee: cautious startup stance
+- rough: shorter stride with extra lift
+- sand bunkers: slower high-clearance steps
+- mound/slope: wider stance with pitch/roll compensation
+
+To run without visible leg movement:
 
 ```bash
-ros2 launch caddie_bringup caddie_sim.launch.py use_leg_animation:=true
+ros2 launch caddie_bringup caddie_sim.launch.py use_leg_animation:=false
 ```
 
-That mode uses `gz_ros2_control`, `joint_trajectory_controller`, and
-`caddie_control/go2_gait_animator`. It is only a visualizer, not Unitree's
-production locomotion controller. If you enable it, tune it live after launch:
+The gait is still a visualizer, not Unitree's production locomotion controller.
+Tune it live after launch if you want a slower or more expressive walk:
 
 ```bash
-ros2 param set /go2_gait_animator max_step_frequency 0.65
-ros2 param set /go2_gait_animator max_thigh_swing 0.05
-ros2 param set /go2_gait_animator max_calf_swing 0.035
-ros2 param set /go2_gait_animator trajectory_time 0.55
+ros2 param set /go2_gait_animator max_step_frequency 0.55
+ros2 param set /go2_gait_animator max_thigh_swing 0.045
+ros2 param set /go2_gait_animator max_calf_swing 0.032
+ros2 param set /go2_gait_animator trajectory_time 0.70
 ```
 
 The optional velocity limiter remains useful when feeding commands from Nav2 or

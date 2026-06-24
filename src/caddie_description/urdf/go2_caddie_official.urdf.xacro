@@ -3,6 +3,9 @@
   <xacro:arg name="use_gazebo" default="true"/>
   <xacro:arg name="leg_joint_type" default="fixed"/>
   <xacro:arg name="use_leg_control" default="false"/>
+  <xacro:arg name="use_leg_collision" default="true"/>
+  <xacro:arg name="leg_mass_scale" default="1.0"/>
+  <xacro:property name="leg_mass_scale_value" value="$(arg leg_mass_scale)"/>
 
   <xacro:macro name="leg_position_joint" params="joint_name lower upper initial">
     <joint name="${joint_name}">
@@ -16,6 +19,13 @@
       <state_interface name="velocity"/>
       <state_interface name="effort"/>
     </joint>
+  </xacro:macro>
+
+  <xacro:macro name="visual_only_leg_link" params="link_name">
+    <gazebo reference="${link_name}">
+      <gravity>false</gravity>
+      <self_collide>false</self_collide>
+    </gazebo>
   </xacro:macro>
 
   <!--
@@ -90,8 +100,8 @@
   <link name="FL_hip">
     <inertial>
       <origin xyz="-0.0054 0.00194 -0.000105" rpy="0 0 0" />
-      <mass value="0.678" />
-      <inertia ixx="0.00048" ixy="-3.01E-06" ixz="1.11E-06" iyy="0.000884" iyz="-1.42E-06" izz="0.000596" />
+      <mass value="${0.678 * float(leg_mass_scale_value)}" />
+      <inertia ixx="${0.00048 * float(leg_mass_scale_value)}" ixy="${-3.01E-06 * float(leg_mass_scale_value)}" ixz="${1.11E-06 * float(leg_mass_scale_value)}" iyy="${0.000884 * float(leg_mass_scale_value)}" iyz="${-1.42E-06 * float(leg_mass_scale_value)}" izz="${0.000596 * float(leg_mass_scale_value)}" />
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
@@ -99,12 +109,14 @@
         <mesh filename="package://go2_description/dae/hip.dae" />
       </geometry>
       <material name="深色橡胶_001-effect"><color rgba="0.6717055 0.6924257 0.7742702 1" /></material><material name="Material-effect"><color rgba="0.9 0.95 0.95 1" /></material></visual>
+    <xacro:if value="$(arg use_leg_collision)">
     <collision>
       <origin rpy="1.5707963267948966 0 0" xyz="0 0.08 0" />
       <geometry>
         <cylinder length="0.04" radius="0.046" />
       </geometry>
     </collision>
+    </xacro:if>
   </link>
   <joint name="FL_hip_joint" type="$(arg leg_joint_type)">
     <origin xyz="0.1934 0.0465 0" rpy="0 0 0" />
@@ -128,8 +140,8 @@
   <link name="FL_thigh">
     <inertial>
       <origin xyz="-0.00374 -0.0223 -0.0327" rpy="0 0 0" />
-      <mass value="1.152" />
-      <inertia ixx="0.00584" ixy="8.72E-05" ixz="-0.000289" iyy="0.0058" iyz="0.000808" izz="0.00103" />
+      <mass value="${1.152 * float(leg_mass_scale_value)}" />
+      <inertia ixx="${0.00584 * float(leg_mass_scale_value)}" ixy="${8.72E-05 * float(leg_mass_scale_value)}" ixz="${-0.000289 * float(leg_mass_scale_value)}" iyy="${0.0058 * float(leg_mass_scale_value)}" iyz="${0.000808 * float(leg_mass_scale_value)}" izz="${0.00103 * float(leg_mass_scale_value)}" />
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
@@ -137,12 +149,14 @@
         <mesh filename="package://go2_description/dae/thigh.dae" />
       </geometry>
       <material name="深色橡胶_003-effect"><color rgba="0.6717055 0.6924257 0.7742702 1" /></material><material name="Material_009-effect"><color rgba="0.9 0.95 0.95 1" /></material></visual>
+    <xacro:if value="$(arg use_leg_collision)">
     <collision>
       <origin rpy="0 1.5707963267948966 0" xyz="0 0 -0.1065" />
       <geometry>
         <box size="0.213 0.0245 0.034" />
       </geometry>
     </collision>
+    </xacro:if>
   </link>
   <joint name="FL_thigh_joint" type="$(arg leg_joint_type)">
     <origin xyz="0 0.0955 0" rpy="0 0 0" />
@@ -166,8 +180,8 @@
   <link name="FL_calf">
     <inertial>
       <origin xyz="0.00548 -0.000975 -0.115" rpy="0 0 0" />
-      <mass value="0.154" />
-      <inertia ixx="0.00108" ixy="3.4E-07" ixz="1.72E-05" iyy="0.0011" iyz="8.28E-06" izz="3.29E-05" />
+      <mass value="${0.154 * float(leg_mass_scale_value)}" />
+      <inertia ixx="${0.00108 * float(leg_mass_scale_value)}" ixy="${3.4E-07 * float(leg_mass_scale_value)}" ixz="${1.72E-05 * float(leg_mass_scale_value)}" iyy="${0.0011 * float(leg_mass_scale_value)}" iyz="${8.28E-06 * float(leg_mass_scale_value)}" izz="${3.29E-05 * float(leg_mass_scale_value)}" />
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
@@ -175,12 +189,14 @@
         <mesh filename="package://go2_description/dae/calf.dae" />
       </geometry>
       <material name="黑色足端_005-effect"><color rgba="0 0 0 1" /></material><material name="深色橡胶_005-effect"><color rgba="0.6717055 0.6924257 0.7742702 1" /></material></visual>
+    <xacro:if value="$(arg use_leg_collision)">
     <collision>
       <origin rpy="0 -0.21 0" xyz="0.008 0 -0.06" />
       <geometry>
         <cylinder length="0.12" radius="0.012" />
       </geometry>
     </collision>
+    </xacro:if>
   </link>
   <joint name="FL_calf_joint" type="$(arg leg_joint_type)">
     <origin xyz="0 0 -0.213" rpy="0 0 0" />
@@ -190,12 +206,14 @@
     <limit lower="-2.7227" upper="-0.83776" effort="90.0" velocity="15.70" />
   </joint>
   <link name="FL_calflower">
+    <xacro:if value="$(arg use_leg_collision)">
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0" />
       <geometry>
         <cylinder length="0.065" radius="0.011" />
       </geometry>
     </collision>
+    </xacro:if>
   </link>
   <joint name="FL_calflower_joint" type="fixed">
     <origin xyz="0.020 0 -0.148" rpy="0 0.05 0" />
@@ -204,12 +222,14 @@
     <axis xyz="0 0 0" />
   </joint>
   <link name="FL_calflower1">
+    <xacro:if value="$(arg use_leg_collision)">
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0" />
       <geometry>
         <cylinder length="0.03" radius="0.0155" />
       </geometry>
     </collision>
+    </xacro:if>
   </link>
   <joint name="FL_calflower1_joint" type="fixed">
     <origin xyz="-0.01 0 -0.04" rpy="0 0.48 0" />
@@ -232,8 +252,8 @@
   <link name="FL_foot">
     <inertial>
       <origin xyz="0 0 0" rpy="0 0 0" />
-      <mass value="0.04" />
-      <inertia ixx="9.6e-06" ixy="0" ixz="0" iyy="9.6e-06" iyz="0" izz="9.6e-06" />
+      <mass value="${0.04 * float(leg_mass_scale_value)}" />
+      <inertia ixx="${9.6e-06 * float(leg_mass_scale_value)}" ixy="${0 * float(leg_mass_scale_value)}" ixz="${0 * float(leg_mass_scale_value)}" iyy="${9.6e-06 * float(leg_mass_scale_value)}" iyz="${0 * float(leg_mass_scale_value)}" izz="${9.6e-06 * float(leg_mass_scale_value)}" />
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
@@ -241,12 +261,14 @@
         <mesh filename="package://go2_description/dae/foot.dae" />
       </geometry>
       <material name="黑色足端_007-effect"><color rgba="0 0 0 1" /></material></visual>
+    <xacro:if value="$(arg use_leg_collision)">
     <collision>
       <origin rpy="0 0 0" xyz="-0.002 0 0" />
       <geometry>
         <sphere radius="0.022" />
       </geometry>
     </collision>
+    </xacro:if>
   </link>
   <joint name="FL_foot_joint" type="fixed" dont_collapse="true">
     <origin xyz="0 0 -0.213" rpy="0 0 0" />
@@ -257,8 +279,8 @@
   <link name="FR_hip">
     <inertial>
       <origin xyz="-0.0054 -0.00194 -0.000105" rpy="0 0 0" />
-      <mass value="0.678" />
-      <inertia ixx="0.00048" ixy="3.01E-06" ixz="1.11E-06" iyy="0.000884" iyz="1.42E-06" izz="0.000596" />
+      <mass value="${0.678 * float(leg_mass_scale_value)}" />
+      <inertia ixx="${0.00048 * float(leg_mass_scale_value)}" ixy="${3.01E-06 * float(leg_mass_scale_value)}" ixz="${1.11E-06 * float(leg_mass_scale_value)}" iyy="${0.000884 * float(leg_mass_scale_value)}" iyz="${1.42E-06 * float(leg_mass_scale_value)}" izz="${0.000596 * float(leg_mass_scale_value)}" />
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="3.1415 0 0" />
@@ -266,12 +288,14 @@
         <mesh filename="package://go2_description/dae/hip.dae" />
       </geometry>
       <material name="深色橡胶_001-effect"><color rgba="0.6717055 0.6924257 0.7742702 1" /></material><material name="Material-effect"><color rgba="0.9 0.95 0.95 1" /></material></visual>
+    <xacro:if value="$(arg use_leg_collision)">
     <collision>
       <origin rpy="1.5707963267948966 0 0" xyz="0 -0.08 0" />
       <geometry>
         <cylinder length="0.04" radius="0.046" />
       </geometry>
     </collision>
+    </xacro:if>
   </link>
   <joint name="FR_hip_joint" type="$(arg leg_joint_type)">
     <origin xyz="0.1934 -0.0465 0" rpy="0 0 0" />
@@ -295,8 +319,8 @@
   <link name="FR_thigh">
     <inertial>
       <origin xyz="-0.00374 0.0223 -0.0327" rpy="0 0 0" />
-      <mass value="1.152" />
-      <inertia ixx="0.00584" ixy="-8.72E-05" ixz="-0.000289" iyy="0.0058" iyz="-0.000808" izz="0.00103" />
+      <mass value="${1.152 * float(leg_mass_scale_value)}" />
+      <inertia ixx="${0.00584 * float(leg_mass_scale_value)}" ixy="${-8.72E-05 * float(leg_mass_scale_value)}" ixz="${-0.000289 * float(leg_mass_scale_value)}" iyy="${0.0058 * float(leg_mass_scale_value)}" iyz="${-0.000808 * float(leg_mass_scale_value)}" izz="${0.00103 * float(leg_mass_scale_value)}" />
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
@@ -304,12 +328,14 @@
         <mesh filename="package://go2_description/dae/thigh_mirror.dae" />
       </geometry>
       <material name="深色橡胶_012-effect"><color rgba="0.6717055 0.6924257 0.7742702 1" /></material><material name="Material_011-effect"><color rgba="0.9 0.95 0.95 1" /></material></visual>
+    <xacro:if value="$(arg use_leg_collision)">
     <collision>
       <origin rpy="0 1.5707963267948966 0" xyz="0 0 -0.1065" />
       <geometry>
         <box size="0.213 0.0245 0.034" />
       </geometry>
     </collision>
+    </xacro:if>
   </link>
   <joint name="FR_thigh_joint" type="$(arg leg_joint_type)">
     <origin xyz="0 -0.0955 0" rpy="0 0 0" />
@@ -333,8 +359,8 @@
   <link name="FR_calf">
     <inertial>
       <origin xyz="0.00548 0.000975 -0.115" rpy="0 0 0" />
-      <mass value="0.154" />
-      <inertia ixx="0.00108" ixy="-3.4E-07" ixz="1.72E-05" iyy="0.0011" iyz="-8.28E-06" izz="3.29E-05" />
+      <mass value="${0.154 * float(leg_mass_scale_value)}" />
+      <inertia ixx="${0.00108 * float(leg_mass_scale_value)}" ixy="${-3.4E-07 * float(leg_mass_scale_value)}" ixz="${1.72E-05 * float(leg_mass_scale_value)}" iyy="${0.0011 * float(leg_mass_scale_value)}" iyz="${-8.28E-06 * float(leg_mass_scale_value)}" izz="${3.29E-05 * float(leg_mass_scale_value)}" />
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
@@ -342,12 +368,14 @@
         <mesh filename="package://go2_description/dae/calf_mirror.dae" />
       </geometry>
       <material name="黑色足端_006-effect"><color rgba="0 0 0 1" /></material><material name="深色橡胶_007-effect"><color rgba="0.6717055 0.6924257 0.7742702 1" /></material></visual>
+    <xacro:if value="$(arg use_leg_collision)">
     <collision>
       <origin rpy="0 -0.2 0" xyz="0.01 0 -0.06" />
       <geometry>
         <cylinder length="0.12" radius="0.013" />
       </geometry>
     </collision>
+    </xacro:if>
   </link>
   <joint name="FR_calf_joint" type="$(arg leg_joint_type)">
     <origin xyz="0 0 -0.213" rpy="0 0 0" />
@@ -357,12 +385,14 @@
     <limit lower="-2.7227" upper="-0.83776" effort="90.0" velocity="15.70" />
   </joint>
   <link name="FR_calflower">
+    <xacro:if value="$(arg use_leg_collision)">
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0" />
       <geometry>
         <cylinder length="0.065" radius="0.011" />
       </geometry>
     </collision>
+    </xacro:if>
   </link>
   <joint name="FR_calflower_joint" type="fixed">
     <origin xyz="0.020 0 -0.148" rpy="0 0.05 0" />
@@ -371,12 +401,14 @@
     <axis xyz="0 0 0" />
   </joint>
   <link name="FR_calflower1">
+    <xacro:if value="$(arg use_leg_collision)">
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0" />
       <geometry>
         <cylinder length="0.03" radius="0.0155" />
       </geometry>
     </collision>
+    </xacro:if>
   </link>
   <joint name="FR_calflower1_joint" type="fixed">
     <origin xyz="-0.01 0 -0.04" rpy="0 0.48 0" />
@@ -399,8 +431,8 @@
   <link name="FR_foot">
     <inertial>
       <origin xyz="0 0 0" rpy="0 0 0" />
-      <mass value="0.04" />
-      <inertia ixx="9.6e-06" ixy="0" ixz="0" iyy="9.6e-06" iyz="0" izz="9.6e-06" />
+      <mass value="${0.04 * float(leg_mass_scale_value)}" />
+      <inertia ixx="${9.6e-06 * float(leg_mass_scale_value)}" ixy="${0 * float(leg_mass_scale_value)}" ixz="${0 * float(leg_mass_scale_value)}" iyy="${9.6e-06 * float(leg_mass_scale_value)}" iyz="${0 * float(leg_mass_scale_value)}" izz="${9.6e-06 * float(leg_mass_scale_value)}" />
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
@@ -408,12 +440,14 @@
         <mesh filename="package://go2_description/dae/foot.dae" />
       </geometry>
       <material name="黑色足端_007-effect"><color rgba="0 0 0 1" /></material></visual>
+    <xacro:if value="$(arg use_leg_collision)">
     <collision>
       <origin rpy="0 0 0" xyz="-0.002 0 0" />
       <geometry>
         <sphere radius="0.022" />
       </geometry>
     </collision>
+    </xacro:if>
   </link>
   <joint name="FR_foot_joint" type="fixed" dont_collapse="true">
     <origin xyz="0 0 -0.213" rpy="0 0 0" />
@@ -424,8 +458,8 @@
   <link name="RL_hip">
     <inertial>
       <origin xyz="0.0054 0.00194 -0.000105" rpy="0 0 0" />
-      <mass value="0.678" />
-      <inertia ixx="0.00048" ixy="3.01E-06" ixz="-1.11E-06" iyy="0.000884" iyz="-1.42E-06" izz="0.000596" />
+      <mass value="${0.678 * float(leg_mass_scale_value)}" />
+      <inertia ixx="${0.00048 * float(leg_mass_scale_value)}" ixy="${3.01E-06 * float(leg_mass_scale_value)}" ixz="${-1.11E-06 * float(leg_mass_scale_value)}" iyy="${0.000884 * float(leg_mass_scale_value)}" iyz="${-1.42E-06 * float(leg_mass_scale_value)}" izz="${0.000596 * float(leg_mass_scale_value)}" />
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 3.1415 0" />
@@ -433,12 +467,14 @@
         <mesh filename="package://go2_description/dae/hip.dae" />
       </geometry>
       <material name="深色橡胶_001-effect"><color rgba="0.6717055 0.6924257 0.7742702 1" /></material><material name="Material-effect"><color rgba="0.9 0.95 0.95 1" /></material></visual>
+    <xacro:if value="$(arg use_leg_collision)">
     <collision>
       <origin rpy="1.5707963267948966 0 0" xyz="0 0.08 0" />
       <geometry>
         <cylinder length="0.04" radius="0.046" />
       </geometry>
     </collision>
+    </xacro:if>
   </link>
   <joint name="RL_hip_joint" type="$(arg leg_joint_type)">
     <origin xyz="-0.1934 0.0465 0" rpy="0 0 0" />
@@ -462,8 +498,8 @@
   <link name="RL_thigh">
     <inertial>
       <origin xyz="-0.00374 -0.0223 -0.0327" rpy="0 0 0" />
-      <mass value="1.152" />
-      <inertia ixx="0.00584" ixy="8.72E-05" ixz="-0.000289" iyy="0.0058" iyz="0.000808" izz="0.00103" />
+      <mass value="${1.152 * float(leg_mass_scale_value)}" />
+      <inertia ixx="${0.00584 * float(leg_mass_scale_value)}" ixy="${8.72E-05 * float(leg_mass_scale_value)}" ixz="${-0.000289 * float(leg_mass_scale_value)}" iyy="${0.0058 * float(leg_mass_scale_value)}" iyz="${0.000808 * float(leg_mass_scale_value)}" izz="${0.00103 * float(leg_mass_scale_value)}" />
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
@@ -471,12 +507,14 @@
         <mesh filename="package://go2_description/dae/thigh.dae" />
       </geometry>
       <material name="深色橡胶_003-effect"><color rgba="0.6717055 0.6924257 0.7742702 1" /></material><material name="Material_009-effect"><color rgba="0.9 0.95 0.95 1" /></material></visual>
+    <xacro:if value="$(arg use_leg_collision)">
     <collision>
       <origin rpy="0 1.5707963267948966 0" xyz="0 0 -0.1065" />
       <geometry>
         <box size="0.213 0.0245 0.034" />
       </geometry>
     </collision>
+    </xacro:if>
   </link>
   <joint name="RL_thigh_joint" type="$(arg leg_joint_type)">
     <origin xyz="0 0.0955 0" rpy="0 0 0" />
@@ -500,8 +538,8 @@
   <link name="RL_calf">
     <inertial>
       <origin xyz="0.00548 -0.000975 -0.115" rpy="0 0 0" />
-      <mass value="0.154" />
-      <inertia ixx="0.00108" ixy="3.4E-07" ixz="1.72E-05" iyy="0.0011" iyz="8.28E-06" izz="3.29E-05" />
+      <mass value="${0.154 * float(leg_mass_scale_value)}" />
+      <inertia ixx="${0.00108 * float(leg_mass_scale_value)}" ixy="${3.4E-07 * float(leg_mass_scale_value)}" ixz="${1.72E-05 * float(leg_mass_scale_value)}" iyy="${0.0011 * float(leg_mass_scale_value)}" iyz="${8.28E-06 * float(leg_mass_scale_value)}" izz="${3.29E-05 * float(leg_mass_scale_value)}" />
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
@@ -509,12 +547,14 @@
         <mesh filename="package://go2_description/dae/calf.dae" />
       </geometry>
       <material name="黑色足端_005-effect"><color rgba="0 0 0 1" /></material><material name="深色橡胶_005-effect"><color rgba="0.6717055 0.6924257 0.7742702 1" /></material></visual>
+    <xacro:if value="$(arg use_leg_collision)">
     <collision>
       <origin rpy="0 -0.2 0" xyz="0.01 0 -0.06" />
       <geometry>
         <cylinder length="0.12" radius="0.013" />
       </geometry>
     </collision>
+    </xacro:if>
   </link>
   <joint name="RL_calf_joint" type="$(arg leg_joint_type)">
     <origin xyz="0 0 -0.213" rpy="0 0 0" />
@@ -524,12 +564,14 @@
     <limit lower="-2.7227" upper="-0.83776" effort="90.0" velocity="15.70" />
   </joint>
   <link name="RL_calflower">
+    <xacro:if value="$(arg use_leg_collision)">
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0" />
       <geometry>
         <cylinder length="0.065" radius="0.011" />
       </geometry>
     </collision>
+    </xacro:if>
   </link>
   <joint name="RL_calflower_joint" type="fixed">
     <origin xyz="0.020 0 -0.148" rpy="0 0.05 0" />
@@ -538,12 +580,14 @@
     <axis xyz="0 0 0" />
   </joint>
   <link name="RL_calflower1">
+    <xacro:if value="$(arg use_leg_collision)">
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0" />
       <geometry>
         <cylinder length="0.03" radius="0.0155" />
       </geometry>
     </collision>
+    </xacro:if>
   </link>
   <joint name="RL_calflower1_joint" type="fixed">
     <origin xyz="-0.01 0 -0.04" rpy="0 0.48 0" />
@@ -566,8 +610,8 @@
   <link name="RL_foot">
     <inertial>
       <origin xyz="0 0 0" rpy="0 0 0" />
-      <mass value="0.04" />
-      <inertia ixx="9.6e-06" ixy="0" ixz="0" iyy="9.6e-06" iyz="0" izz="9.6e-06" />
+      <mass value="${0.04 * float(leg_mass_scale_value)}" />
+      <inertia ixx="${9.6e-06 * float(leg_mass_scale_value)}" ixy="${0 * float(leg_mass_scale_value)}" ixz="${0 * float(leg_mass_scale_value)}" iyy="${9.6e-06 * float(leg_mass_scale_value)}" iyz="${0 * float(leg_mass_scale_value)}" izz="${9.6e-06 * float(leg_mass_scale_value)}" />
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
@@ -575,12 +619,14 @@
         <mesh filename="package://go2_description/dae/foot.dae" />
       </geometry>
       <material name="黑色足端_007-effect"><color rgba="0 0 0 1" /></material></visual>
+    <xacro:if value="$(arg use_leg_collision)">
     <collision>
       <origin rpy="0 0 0" xyz="-0.002 0 0" />
       <geometry>
         <sphere radius="0.022" />
       </geometry>
     </collision>
+    </xacro:if>
   </link>
   <joint name="RL_foot_joint" type="fixed" dont_collapse="true">
     <origin xyz="0 0 -0.213" rpy="0 0 0" />
@@ -591,8 +637,8 @@
   <link name="RR_hip">
     <inertial>
       <origin xyz="0.0054 -0.00194 -0.000105" rpy="0 0 0" />
-      <mass value="0.678" />
-      <inertia ixx="0.00048" ixy="-3.01E-06" ixz="-1.11E-06" iyy="0.000884" iyz="1.42E-06" izz="0.000596" />
+      <mass value="${0.678 * float(leg_mass_scale_value)}" />
+      <inertia ixx="${0.00048 * float(leg_mass_scale_value)}" ixy="${-3.01E-06 * float(leg_mass_scale_value)}" ixz="${-1.11E-06 * float(leg_mass_scale_value)}" iyy="${0.000884 * float(leg_mass_scale_value)}" iyz="${1.42E-06 * float(leg_mass_scale_value)}" izz="${0.000596 * float(leg_mass_scale_value)}" />
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="3.1415 3.1415 0" />
@@ -600,12 +646,14 @@
         <mesh filename="package://go2_description/dae/hip.dae" />
       </geometry>
       <material name="深色橡胶_001-effect"><color rgba="0.6717055 0.6924257 0.7742702 1" /></material><material name="Material-effect"><color rgba="0.9 0.95 0.95 1" /></material></visual>
+    <xacro:if value="$(arg use_leg_collision)">
     <collision>
       <origin rpy="1.5707963267948966 0 0" xyz="0 -0.08 0" />
       <geometry>
         <cylinder length="0.04" radius="0.046" />
       </geometry>
     </collision>
+    </xacro:if>
   </link>
   <joint name="RR_hip_joint" type="$(arg leg_joint_type)">
     <origin xyz="-0.1934 -0.0465 0" rpy="0 0 0" />
@@ -629,8 +677,8 @@
   <link name="RR_thigh">
     <inertial>
       <origin xyz="-0.00374 0.0223 -0.0327" rpy="0 0 0" />
-      <mass value="1.152" />
-      <inertia ixx="0.00584" ixy="-8.72E-05" ixz="-0.000289" iyy="0.0058" iyz="-0.000808" izz="0.00103" />
+      <mass value="${1.152 * float(leg_mass_scale_value)}" />
+      <inertia ixx="${0.00584 * float(leg_mass_scale_value)}" ixy="${-8.72E-05 * float(leg_mass_scale_value)}" ixz="${-0.000289 * float(leg_mass_scale_value)}" iyy="${0.0058 * float(leg_mass_scale_value)}" iyz="${-0.000808 * float(leg_mass_scale_value)}" izz="${0.00103 * float(leg_mass_scale_value)}" />
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
@@ -638,12 +686,14 @@
         <mesh filename="package://go2_description/dae/thigh_mirror.dae" />
       </geometry>
       <material name="深色橡胶_012-effect"><color rgba="0.6717055 0.6924257 0.7742702 1" /></material><material name="Material_011-effect"><color rgba="0.9 0.95 0.95 1" /></material></visual>
+    <xacro:if value="$(arg use_leg_collision)">
     <collision>
       <origin rpy="0 1.5707963267948966 0" xyz="0 0 -0.1065" />
       <geometry>
         <box size="0.213 0.0245 0.034" />
       </geometry>
     </collision>
+    </xacro:if>
   </link>
   <joint name="RR_thigh_joint" type="$(arg leg_joint_type)">
     <origin xyz="0 -0.0955 0" rpy="0 0 0" />
@@ -667,8 +717,8 @@
   <link name="RR_calf">
     <inertial>
       <origin xyz="0.00548 0.000975 -0.115" rpy="0 0 0" />
-      <mass value="0.154" />
-      <inertia ixx="0.00108" ixy="-3.4E-07" ixz="1.72E-05" iyy="0.0011" iyz="-8.28E-06" izz="3.29E-05" />
+      <mass value="${0.154 * float(leg_mass_scale_value)}" />
+      <inertia ixx="${0.00108 * float(leg_mass_scale_value)}" ixy="${-3.4E-07 * float(leg_mass_scale_value)}" ixz="${1.72E-05 * float(leg_mass_scale_value)}" iyy="${0.0011 * float(leg_mass_scale_value)}" iyz="${-8.28E-06 * float(leg_mass_scale_value)}" izz="${3.29E-05 * float(leg_mass_scale_value)}" />
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
@@ -676,12 +726,14 @@
         <mesh filename="package://go2_description/dae/calf_mirror.dae" />
       </geometry>
       <material name="黑色足端_006-effect"><color rgba="0 0 0 1" /></material><material name="深色橡胶_007-effect"><color rgba="0.6717055 0.6924257 0.7742702 1" /></material></visual>
+    <xacro:if value="$(arg use_leg_collision)">
     <collision>
       <origin rpy="0 -0.2 0" xyz="0.01 0 -0.06" />
       <geometry>
         <cylinder length="0.12" radius="0.013" />
       </geometry>
     </collision>
+    </xacro:if>
   </link>
   <joint name="RR_calf_joint" type="$(arg leg_joint_type)">
     <origin xyz="0 0 -0.213" rpy="0 0 0" />
@@ -691,12 +743,14 @@
     <limit lower="-2.7227" upper="-0.83776" effort="90.0" velocity="15.70" />
   </joint>
   <link name="RR_calflower">
+    <xacro:if value="$(arg use_leg_collision)">
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0" />
       <geometry>
         <cylinder length="0.065" radius="0.011" />
       </geometry>
     </collision>
+    </xacro:if>
   </link>
   <joint name="RR_calflower_joint" type="fixed">
     <origin xyz="0.020 0 -0.148" rpy="0 0.05 0" />
@@ -705,12 +759,14 @@
     <axis xyz="0 0 0" />
   </joint>
   <link name="RR_calflower1">
+    <xacro:if value="$(arg use_leg_collision)">
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0" />
       <geometry>
         <cylinder length="0.03" radius="0.0155" />
       </geometry>
     </collision>
+    </xacro:if>
   </link>
   <joint name="RR_calflower1_joint" type="fixed">
     <origin xyz="-0.01 0 -0.04" rpy="0 0.48 0" />
@@ -733,8 +789,8 @@
   <link name="RR_foot">
     <inertial>
       <origin xyz="0 0 0" rpy="0 0 0" />
-      <mass value="0.04" />
-      <inertia ixx="9.6e-06" ixy="0" ixz="0" iyy="9.6e-06" iyz="0" izz="9.6e-06" />
+      <mass value="${0.04 * float(leg_mass_scale_value)}" />
+      <inertia ixx="${9.6e-06 * float(leg_mass_scale_value)}" ixy="${0 * float(leg_mass_scale_value)}" ixz="${0 * float(leg_mass_scale_value)}" iyy="${9.6e-06 * float(leg_mass_scale_value)}" iyz="${0 * float(leg_mass_scale_value)}" izz="${9.6e-06 * float(leg_mass_scale_value)}" />
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
@@ -742,12 +798,14 @@
         <mesh filename="package://go2_description/dae/foot.dae" />
       </geometry>
       <material name="黑色足端_007-effect"><color rgba="0 0 0 1" /></material></visual>
+    <xacro:if value="$(arg use_leg_collision)">
     <collision>
       <origin rpy="0 0 0" xyz="-0.002 0 0" />
       <geometry>
         <sphere radius="0.022" />
       </geometry>
     </collision>
+    </xacro:if>
   </link>
   <joint name="RR_foot_joint" type="fixed" dont_collapse="true">
     <origin xyz="0 0 -0.213" rpy="0 0 0" />
@@ -983,9 +1041,34 @@
         <plugin filename="libgz_ros2_control-system.so" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
           <parameters>$(find caddie_description)/config/go2_leg_controllers.yaml</parameters>
           <hold_joints>true</hold_joints>
-          <position_proportional_gain>60.0</position_proportional_gain>
+          <position_proportional_gain>120.0</position_proportional_gain>
         </plugin>
       </gazebo>
+
+      <xacro:visual_only_leg_link link_name="FL_hip"/>
+      <xacro:visual_only_leg_link link_name="FL_thigh"/>
+      <xacro:visual_only_leg_link link_name="FL_calf"/>
+      <xacro:visual_only_leg_link link_name="FL_calflower"/>
+      <xacro:visual_only_leg_link link_name="FL_calflower1"/>
+      <xacro:visual_only_leg_link link_name="FL_foot"/>
+      <xacro:visual_only_leg_link link_name="FR_hip"/>
+      <xacro:visual_only_leg_link link_name="FR_thigh"/>
+      <xacro:visual_only_leg_link link_name="FR_calf"/>
+      <xacro:visual_only_leg_link link_name="FR_calflower"/>
+      <xacro:visual_only_leg_link link_name="FR_calflower1"/>
+      <xacro:visual_only_leg_link link_name="FR_foot"/>
+      <xacro:visual_only_leg_link link_name="RL_hip"/>
+      <xacro:visual_only_leg_link link_name="RL_thigh"/>
+      <xacro:visual_only_leg_link link_name="RL_calf"/>
+      <xacro:visual_only_leg_link link_name="RL_calflower"/>
+      <xacro:visual_only_leg_link link_name="RL_calflower1"/>
+      <xacro:visual_only_leg_link link_name="RL_foot"/>
+      <xacro:visual_only_leg_link link_name="RR_hip"/>
+      <xacro:visual_only_leg_link link_name="RR_thigh"/>
+      <xacro:visual_only_leg_link link_name="RR_calf"/>
+      <xacro:visual_only_leg_link link_name="RR_calflower"/>
+      <xacro:visual_only_leg_link link_name="RR_calflower1"/>
+      <xacro:visual_only_leg_link link_name="RR_foot"/>
     </xacro:if>
 
     <gazebo reference="lidar_link">
