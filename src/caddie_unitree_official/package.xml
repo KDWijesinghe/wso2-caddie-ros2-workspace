@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>caddie_unitree_official</name>
+  <version>0.1.0</version>
+  <description>Official Unitree Go2 MuJoCo assets and SDK2 integration references for WSO2 Caddie.</description>
+  <maintainer email="abdulr.23@cse.mrt.ac.lk">Team Talos</maintainer>
+  <license>BSD-3-Clause</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

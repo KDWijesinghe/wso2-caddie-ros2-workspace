@@ -1,0 +1,40 @@
+# ROS 2 generated workspace outputs
+/build/
+/install/
+/log/
+
+# Python caches and test output
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# CMake and compiler artifacts
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+compile_commands.json
+*.o
+*.so
+*.a
+
+# Gazebo / ROS runtime data
+*.bag
+*.db
+*.db-shm
+*.db-wal
+*.mcap
+*.log
+
+# Editor and OS metadata
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db

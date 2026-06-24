@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>caddie_description</name>
+  <version>0.1.0</version>
+  <description>Simulation description for the WSO2 Caddie Unitree Go2 Edu robot.</description>
+  <maintainer email="abdulr.23@cse.mrt.ac.lk">Team Talos</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <exec_depend>go2_description</exec_depend>
+  <exec_depend>gz_ros2_control</exec_depend>
+  <exec_depend>robot_state_publisher</exec_depend>
+  <exec_depend>xacro</exec_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

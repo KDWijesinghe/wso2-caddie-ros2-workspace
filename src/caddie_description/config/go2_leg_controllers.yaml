@@ -1,0 +1,73 @@
+controller_manager:
+  ros__parameters:
+    update_rate: 100
+
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+
+    go2_leg_controller:
+      type: joint_trajectory_controller/JointTrajectoryController
+
+go2_leg_controller:
+  ros__parameters:
+    joints:
+      - FL_hip_joint
+      - FL_thigh_joint
+      - FL_calf_joint
+      - FR_hip_joint
+      - FR_thigh_joint
+      - FR_calf_joint
+      - RL_hip_joint
+      - RL_thigh_joint
+      - RL_calf_joint
+      - RR_hip_joint
+      - RR_thigh_joint
+      - RR_calf_joint
+    command_interfaces:
+      - position
+    state_interfaces:
+      - position
+      - velocity
+    allow_partial_joints_goal: false
+    open_loop_control: false
+    interpolation_method: splines
+    action_monitor_rate: 20.0
+    constraints:
+      goal_time: 1.0
+      stopped_velocity_tolerance: 2.0
+      FL_hip_joint:
+        trajectory: 2.5
+        goal: 2.5
+      FL_thigh_joint:
+        trajectory: 2.5
+        goal: 2.5
+      FL_calf_joint:
+        trajectory: 2.5
+        goal: 2.5
+      FR_hip_joint:
+        trajectory: 2.5
+        goal: 2.5
+      FR_thigh_joint:
+        trajectory: 2.5
+        goal: 2.5
+      FR_calf_joint:
+        trajectory: 2.5
+        goal: 2.5
+      RL_hip_joint:
+        trajectory: 2.5
+        goal: 2.5
+      RL_thigh_joint:
+        trajectory: 2.5
+        goal: 2.5
+      RL_calf_joint:
+        trajectory: 2.5
+        goal: 2.5
+      RR_hip_joint:
+        trajectory: 2.5
+        goal: 2.5
+      RR_thigh_joint:
+        trajectory: 2.5
+        goal: 2.5
+      RR_calf_joint:
+        trajectory: 2.5
+        goal: 2.5
