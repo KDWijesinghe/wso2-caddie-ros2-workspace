@@ -115,6 +115,44 @@ class DogActionsController:
                 
                 # හරියටම මීටර් 4ක් දුර ගියාට පස්සේ...
                 if dist_traveled >= 4.0:
+                    # 🛑 FIX: Linear සහ Angular වේගයන් 6ම බිංදුව කිරීම (Stop all 6 DOFs)
+                    for i in range(6):
+                        self.data.qvel[dof_adr + i] = 0.0
+                    
+                    self.is_ball_hit = False
+                    speed = 0.0  # Speed variable එකත් 0 කරනවා බල්ලාට තේරෙන්න
+                    self.node.get_logger().info(f"🛑 බෝලය මීටර් {dist_traveled:.2f} ක් දුර ගිහින් සම්පූර්ණයෙන්ම නැවතුණා!")
+
+            # 1. බෝලයේ Speed එක 0.5 ට වඩා වැඩි නම් (ගහපු ගමන්)
+            if speed > 0.5 and self.nav_sm.state == 'MANUAL':
+                self.node.get_logger().info("👀 බෝලය විසි වෙනවා දැක්කා! පස්සෙන් පන්නනවා...")
+                self.nav_sm.state = 'TRACKING_VISUAL'
+                self.ball_was_moving = True
+
+            # 2. බෝලය නැවතුණාම (Speed 0 වුණාම)
+            elif self.nav_sm.state == 'TRACKING_VISUAL' and self.ball_was_moving:
+                if speed < 0.05:  
+                    self.node.get_logger().info("🛑 බෝලය නැවතුණා! අරන් එන්න පිටත් වෙනවා...")
+                    self.nav_sm.state = 'GOTO_BALL'
+                    self.ball_was_moving = False
+        """Auto-triggers tracking, stops ball at 4m, and fetches"""
+        if self.ball_jnt_id != -1:
+            dof_adr = self.model.jnt_dofadr[self.ball_jnt_id]
+            ball_vx = self.data.qvel[dof_adr]
+            ball_vy = self.data.qvel[dof_adr + 1]
+            speed = np.sqrt(ball_vx**2 + ball_vy**2)
+
+            # 🚀 4-Meter Stop Logic (මීටර් 4ක් ගියාම බෝලය නවත්වන්න)
+            if self.is_ball_hit:
+                qpos_idx = self.model.jnt_qposadr[self.ball_jnt_id]
+                current_x = self.data.qpos[qpos_idx]
+                current_y = self.data.qpos[qpos_idx + 1]
+                
+                # ගිය දුර ගණනය කිරීම
+                dist_traveled = np.sqrt((current_x - self.hit_start_x)**2 + (current_y - self.hit_start_y)**2)
+                
+                # හරියටම මීටර් 4ක් දුර ගියාට පස්සේ...
+                if dist_traveled >= 4.0:
                     # වේගය 0 කරලා බෝලය එකතැන Stop කරනවා
                     self.data.qvel[dof_adr] = 0.0
                     self.data.qvel[dof_adr + 1] = 0.0
