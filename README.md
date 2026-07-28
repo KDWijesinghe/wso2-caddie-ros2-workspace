@@ -215,3 +215,10 @@ ros2 run caddie_control unitree_sportmode_bridge
 
 
 Use that bridge only when the Unitree ROS 2 middleware or robot-side SDK agent is available. In Gazebo Sim, leave use_unitree_sport_bridge:=false unless you are testing the message flow.
+
+
+ros2 topic pub /caddie/text_command std_msgs/msg/String "data: 'hit'" --once
+
+
+publisher: beginning loop
+publishing #1: std_msgs.msg.String(data='hit')
