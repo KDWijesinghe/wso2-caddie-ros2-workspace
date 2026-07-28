@@ -81,21 +81,31 @@ class DogActionsController:
             self.node.get_logger().info(f"⛳ Ball teleported to: [{msg.pose.position.x:.2f}, {msg.pose.position.y:.2f}]")
 
     def update_ball_attachment(self):
-        """Handles physical grabbing & pinning the ball"""
+        """Handles physical grabbing & pinning the ball exactly at the dog's mouth"""
         if self.nav_sm.state == 'GRAB_BALL':
             self.nav_sm.ball_grabbed = True
             self.node.get_logger().info("🎒 බෝලය කටට Lock වුණා! ආපහු Home එකට යනවා...")
             self.nav_sm.state = 'RETURN_WITH_BALL'
 
+        # බෝලය Grab කරලා නම් තියෙන්නේ...
         if self.nav_sm.ball_grabbed and self.ball_body_id != -1 and self.trunk_id != -1:
             dog_pos = self.data.xpos[self.trunk_id]
             R = self.data.xmat[self.trunk_id].reshape(3, 3)
             
-            mouth_pos = dog_pos + R[:, 0] * 0.20 - R[:, 2] * 0.10
+            # 🚀 FIX: බල්ලාගේ ඔළුව තියෙන තැනට හරියටම බෝලය ගේනවා 
+            # (ඉස්සරහට 32cm යි, පල්ලෙහාට 2cm යි - හරියටම නහය ගාවට)
+            mouth_pos = dog_pos + R[:, 0] * 0.32 - R[:, 2] * 0.02
+            
             if self.ball_jnt_id != -1:
                 qpos_idx = self.model.jnt_qposadr[self.ball_jnt_id]
+                dof_adr = self.model.jnt_dofadr[self.ball_jnt_id]
+                
+                # 1. බෝලයේ Position එක හරියටම මූණ ඉස්සරහට සෙට් කරනවා
                 self.data.qpos[qpos_idx:qpos_idx+3] = mouth_pos
-
+                
+                # 2. බෝලය ගැස්සෙන්නේ / වැටෙන්නේ නැති වෙන්න Velocity 6ම 0 කරනවා
+                for i in range(6):
+                    self.data.qvel[dof_adr + i] = 0.0
     def monitor_ball_and_autofetch(self):
         """Auto-triggers tracking, stops ball at 4m, and fetches"""
         if self.ball_jnt_id != -1:
