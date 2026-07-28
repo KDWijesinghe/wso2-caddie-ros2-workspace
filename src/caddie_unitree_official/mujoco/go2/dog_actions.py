@@ -18,6 +18,11 @@ class DogActionsController:
         
         # Auto-fetch State Tracking
         self.ball_was_moving = False
+        
+        # 🚀 අලුත් දේවල්: බෝලය යන දුර මනින්න (Hit Distance Tracker)
+        self.is_ball_hit = False
+        self.hit_start_x = 0.0
+        self.hit_start_y = 0.0
 
         # ROS 2 Subscriptions
         self.node.create_subscription(Twist, '/cmd_vel', self.cmd_vel_callback, 10)
@@ -42,14 +47,21 @@ class DogActionsController:
         elif 'track' in cmd or 'watch' in cmd:
             self.node.get_logger().info("Command Received: Watching the ball...")
             self.nav_sm.state = 'TRACKING_VISUAL'
-        # 🏌️‍♂️ අලුතෙන් දැම්ම HIT Command එක!
+        
+        # 🏌️‍♂️ HIT Command එක
         elif 'hit' in cmd:
             self.node.get_logger().info("🏌️ WHACK! බෝලයට ගැහුවා...")
             if self.ball_jnt_id != -1:
+                # ගහන වෙලාවේ බෝලය තියෙන තැන සටහන් කරගන්නවා
+                qpos_idx = self.model.jnt_qposadr[self.ball_jnt_id]
+                self.hit_start_x = self.data.qpos[qpos_idx]
+                self.hit_start_y = self.data.qpos[qpos_idx + 1]
+                self.is_ball_hit = True
+                
+                # බෝලයට Physics Velocity එකක් දෙනවා
                 dof_adr = self.model.jnt_dofadr[self.ball_jnt_id]
-                # බෝලයට Physics Velocity එකක් දෙනවා (ඉස්සරහට 3m/s, පැත්තට 1.5m/s)
-                self.data.qvel[dof_adr] = 3.0
-                self.data.qvel[dof_adr + 1] = 1.5
+                self.data.qvel[dof_adr] = 5.0  # ටිකක් වැඩි වේගයක් දුන්නා
+                self.data.qvel[dof_adr + 1] = 1.0
                 self.data.qvel[dof_adr + 2] = 0.0
 
     def ball_detection_callback(self, msg):
@@ -64,7 +76,6 @@ class DogActionsController:
             self.data.qpos[qpos_idx + 1] = msg.pose.position.y
             self.data.qpos[qpos_idx + 2] = 0.05
             
-            # ටෙලිපෝට් කරන ගමන් පොඩි Velocity එකක් දෙනවා Auto-Fetch එක අහුවෙන්න!
             dof_adr = self.model.jnt_dofadr[self.ball_jnt_id]
             self.data.qvel[dof_adr] = 0.6  
             self.node.get_logger().info(f"⛳ Ball teleported to: [{msg.pose.position.x:.2f}, {msg.pose.position.y:.2f}]")
@@ -86,22 +97,42 @@ class DogActionsController:
                 self.data.qpos[qpos_idx:qpos_idx+3] = mouth_pos
 
     def monitor_ball_and_autofetch(self):
-        """Auto-triggers tracking and fetching"""
+        """Auto-triggers tracking, stops ball at 4m, and fetches"""
         if self.ball_jnt_id != -1:
             dof_adr = self.model.jnt_dofadr[self.ball_jnt_id]
             ball_vx = self.data.qvel[dof_adr]
             ball_vy = self.data.qvel[dof_adr + 1]
             speed = np.sqrt(ball_vx**2 + ball_vy**2)
 
+            # 🚀 4-Meter Stop Logic (මීටර් 4ක් ගියාම බෝලය නවත්වන්න)
+            if self.is_ball_hit:
+                qpos_idx = self.model.jnt_qposadr[self.ball_jnt_id]
+                current_x = self.data.qpos[qpos_idx]
+                current_y = self.data.qpos[qpos_idx + 1]
+                
+                # ගිය දුර ගණනය කිරීම
+                dist_traveled = np.sqrt((current_x - self.hit_start_x)**2 + (current_y - self.hit_start_y)**2)
+                
+                # හරියටම මීටර් 4ක් දුර ගියාට පස්සේ...
+                if dist_traveled >= 4.0:
+                    # වේගය 0 කරලා බෝලය එකතැන Stop කරනවා
+                    self.data.qvel[dof_adr] = 0.0
+                    self.data.qvel[dof_adr + 1] = 0.0
+                    self.data.qvel[dof_adr + 2] = 0.0
+                    
+                    self.is_ball_hit = False
+                    speed = 0.0  # Speed variable එකත් 0 කරනවා බල්ලාට තේරෙන්න
+                    self.node.get_logger().info("🛑 බෝලය මීටර් 4ක් දුර ගිහින් නැවතුණා!")
+
             # 1. බෝලයේ Speed එක 0.5 ට වඩා වැඩි නම් (ගහපු ගමන්)
             if speed > 0.5 and self.nav_sm.state == 'MANUAL':
-                self.node.get_logger().info("👀 බෝලය විසි වෙනවා දැක්කා! (Tracking...)")
+                self.node.get_logger().info("👀 බෝලය විසි වෙනවා දැක්කා! පස්සෙන් පන්නනවා...")
                 self.nav_sm.state = 'TRACKING_VISUAL'
                 self.ball_was_moving = True
 
             # 2. බෝලය නැවතුණාම (Speed 0 වුණාම)
             elif self.nav_sm.state == 'TRACKING_VISUAL' and self.ball_was_moving:
-                if speed < 0.05:  # Ball completely stopped
+                if speed < 0.05:  
                     self.node.get_logger().info("🛑 බෝලය නැවතුණා! අරන් එන්න පිටත් වෙනවා...")
                     self.nav_sm.state = 'GOTO_BALL'
                     self.ball_was_moving = False

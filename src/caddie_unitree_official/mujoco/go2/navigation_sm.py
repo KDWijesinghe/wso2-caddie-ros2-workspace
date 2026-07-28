@@ -36,7 +36,7 @@ class NavigationStateMachine:
             local_angle = np.arctan2(np.sin(global_heading - robot_yaw), np.cos(global_heading - robot_yaw))
 
             # හැරෙන වේගය (Turn Speed)
-            wz = np.clip(1.5 * local_angle, -0.8, 0.8)
+            wz = np.clip(-0.5 * local_angle, -0.8, 0.8)
 
             # 🚀 SMOOTH CHASE LOGIC (මෙතන තමයි වෙනස් වුණේ) 🚀
             if self.state == 'TRACKING_VISUAL':
