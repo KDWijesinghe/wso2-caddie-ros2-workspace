@@ -50,7 +50,7 @@ class DogActionsController:
         
         # 🏌️‍♂️ HIT Command එක
         elif 'hit' in cmd:
-            self.node.get_logger().info("🏌️ WHACK! බෝලයට ගැහුවා...")
+            self.node.get_logger().info(" WHACK! බෝලයට ගැහුවා...")
             if self.ball_jnt_id != -1:
                 # ගහන වෙලාවේ බෝලය තියෙන තැන සටහන් කරගන්නවා
                 qpos_idx = self.model.jnt_qposadr[self.ball_jnt_id]
@@ -142,7 +142,7 @@ class DogActionsController:
             # 2. බෝලය නැවතුණාම (Speed 0 වුණාම)
             elif self.nav_sm.state == 'TRACKING_VISUAL' and self.ball_was_moving:
                 if speed < 0.05:  
-                    self.node.get_logger().info("🛑 බෝලය නැවතුණා! අරන් එන්න පිටත් වෙනවා...")
+                    self.node.get_logger().info("බෝලය නැවතුණා! අරන් එන්න පිටත් වෙනවා...")
                     self.nav_sm.state = 'GOTO_BALL'
                     self.ball_was_moving = False
         """Auto-triggers tracking, stops ball at 4m, and fetches"""
@@ -174,13 +174,13 @@ class DogActionsController:
 
             # 1. බෝලයේ Speed එක 0.5 ට වඩා වැඩි නම්(ගහපු ගමන්)
             if speed > 0.5 and self.nav_sm.state == 'MANUAL':
-                self.node.get_logger().info("👀 බෝලය විසි වෙනවා දැක්කා! පස්සෙන් පන්නනවා...")
+                self.node.get_logger().info(" බෝලය විසි වෙනවා දැක්කා! පස්සෙන් පන්නනවා...")
                 self.nav_sm.state = 'TRACKING_VISUAL'
                 self.ball_was_moving = True
 
             # 2. බෝලය නැවතුණාම(Speed=0 වුණාම)
             elif self.nav_sm.state == 'TRACKING_VISUAL' and self.ball_was_moving:
                 if speed < 0.05:  
-                    self.node.get_logger().info("🛑 බෝලය නැවතුණා! අරන් එන්න පිටත් වෙනවා...")
+                    self.node.get_logger().info("බෝලය නැවතුණා! අරන් එන්න පිටත් වෙනවා...")
                     self.nav_sm.state = 'GOTO_BALL'
                     self.ball_was_moving = False
