@@ -51,13 +51,13 @@ class DogActionsController:
             self.data.qpos[qpos_idx] = msg.pose.position.x
             self.data.qpos[qpos_idx + 1] = msg.pose.position.y
             self.data.qpos[qpos_idx + 2] = 0.05
-            self.node.get_logger().info(f"⛳ Ball teleported to: [{msg.pose.position.x:.2f}, {msg.pose.position.y:.2f}]")
+            self.node.get_logger().info(f"Ball teleported to: [{msg.pose.position.x:.2f}, {msg.pose.position.y:.2f}]")
 
     def update_ball_attachment(self):
         """Handles physical grabbing & pinning the ball in front of the dog's mouth"""
         if self.nav_sm.state == 'GRAB_BALL':
             self.nav_sm.ball_grabbed = True
-            self.node.get_logger().info("🎒 Ball Locked! Returning Home...")
+            self.node.get_logger().info("Ball Locked! Returning Home...")
             self.nav_sm.state = 'RETURN_WITH_BALL'
 
         if self.nav_sm.ball_grabbed and self.ball_body_id != -1 and self.trunk_id != -1:
