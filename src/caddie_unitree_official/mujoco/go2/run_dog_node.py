@@ -61,8 +61,8 @@ class Go2MujocoWalkBridge(Node):
                 if self.nav_sm.state != 'MANUAL':
                     self.target_velocity = self.nav_sm.compute_target_velocity(rx, ry, ryaw, spotted, bx, by)
 
-                # 🎯 Auto-Fetch & Attachment Logic 🎯
-                self.actions.monitor_ball_and_autofetch() # 👈 අලුතෙන් දැම්ම Function එක!
+                #  Auto-Fetch & Attachment Logic 
+                self.actions.monitor_ball_and_autofetch()
                 self.actions.update_ball_attachment()
 
                 # Velocity Ramp Filters
