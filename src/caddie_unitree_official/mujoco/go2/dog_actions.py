@@ -19,7 +19,7 @@ class DogActionsController:
         # Auto-fetch State Tracking
         self.ball_was_moving = False
         
-        # 🚀 අලුත් දේවල්: බෝලය යන දුර මනින්න (Hit Distance Tracker)
+        # බෝලය යන දුර මනින්න (Hit Distance Tracker)
         self.is_ball_hit = False
         self.hit_start_x = 0.0
         self.hit_start_y = 0.0
@@ -78,13 +78,13 @@ class DogActionsController:
             
             dof_adr = self.model.jnt_dofadr[self.ball_jnt_id]
             self.data.qvel[dof_adr] = 0.6  
-            self.node.get_logger().info(f"⛳ Ball teleported to: [{msg.pose.position.x:.2f}, {msg.pose.position.y:.2f}]")
+            self.node.get_logger().info(f" Ball teleported to: [{msg.pose.position.x:.2f}, {msg.pose.position.y:.2f}]")
 
     def update_ball_attachment(self):
         """Handles physical grabbing & pinning the ball exactly at the dog's mouth"""
         if self.nav_sm.state == 'GRAB_BALL':
             self.nav_sm.ball_grabbed = True
-            self.node.get_logger().info("🎒 බෝලය කටට Lock වුණා! ආපහු Home එකට යනවා...")
+            self.node.get_logger().info(" බෝලය කටට Lock වුණා! ආපහු Home එකට යනවා...")
             self.nav_sm.state = 'RETURN_WITH_BALL'
 
         # බෝලය Grab කරලා නම් තියෙන්නේ...
@@ -92,7 +92,7 @@ class DogActionsController:
             dog_pos = self.data.xpos[self.trunk_id]
             R = self.data.xmat[self.trunk_id].reshape(3, 3)
             
-            # 🚀 FIX: බල්ලාගේ ඔළුව තියෙන තැනට හරියටම බෝලය ගේනවා 
+            #  බල්ලාගේ ඔළුව තියෙන තැනට හරියටම බෝලය ගේනවා 
             # (ඉස්සරහට 32cm යි, පල්ලෙහාට 2cm යි - හරියටම නහය ගාවට)
             mouth_pos = dog_pos + R[:, 0] * 0.32 - R[:, 2] * 0.02
             
@@ -114,7 +114,7 @@ class DogActionsController:
             ball_vy = self.data.qvel[dof_adr + 1]
             speed = np.sqrt(ball_vx**2 + ball_vy**2)
 
-            # 🚀 4-Meter Stop Logic (මීටර් 4ක් ගියාම බෝලය නවත්වන්න)
+            # 4-Meter Stop Logic (මීටර් 4ක් ගියාම බෝලය නවත්වන්න)
             if self.is_ball_hit:
                 qpos_idx = self.model.jnt_qposadr[self.ball_jnt_id]
                 current_x = self.data.qpos[qpos_idx]
@@ -125,13 +125,13 @@ class DogActionsController:
                 
                 # හරියටම මීටර් 4ක් දුර ගියාට පස්සේ...
                 if dist_traveled >= 4.0:
-                    # 🛑 FIX: Linear සහ Angular වේගයන් 6ම බිංදුව කිරීම (Stop all 6 DOFs)
+                    # Linear සහ Angular වේගයන් 6ම බිංදුව කිරීම (Stop all 6 DOFs)
                     for i in range(6):
                         self.data.qvel[dof_adr + i] = 0.0
                     
                     self.is_ball_hit = False
                     speed = 0.0  # Speed variable එකත් 0 කරනවා බල්ලාට තේරෙන්න
-                    self.node.get_logger().info(f"🛑 බෝලය මීටර් {dist_traveled:.2f} ක් දුර ගිහින් සම්පූර්ණයෙන්ම නැවතුණා!")
+                    self.node.get_logger().info(f" බෝලය මීටර් {dist_traveled:.2f} ක් දුර ගිහින් සම්පූර්ණයෙන්ම නැවතුණා!")
 
             # 1. බෝලයේ Speed එක 0.5 ට වඩා වැඩි නම් (ගහපු ගමන්)
             if speed > 0.5 and self.nav_sm.state == 'MANUAL':
@@ -152,7 +152,7 @@ class DogActionsController:
             ball_vy = self.data.qvel[dof_adr + 1]
             speed = np.sqrt(ball_vx**2 + ball_vy**2)
 
-            # 🚀 4-Meter Stop Logic (මීටර් 4ක් ගියාම බෝලය නවත්වන්න)
+            # 4-Meter Stop Logic (මීටර් 4ක් ගියාම බෝලය නවත්වන්න)
             if self.is_ball_hit:
                 qpos_idx = self.model.jnt_qposadr[self.ball_jnt_id]
                 current_x = self.data.qpos[qpos_idx]
@@ -170,15 +170,15 @@ class DogActionsController:
                     
                     self.is_ball_hit = False
                     speed = 0.0  # Speed variable එකත් 0 කරනවා බල්ලාට තේරෙන්න
-                    self.node.get_logger().info("🛑 බෝලය මීටර් 4ක් දුර ගිහින් නැවතුණා!")
+                    self.node.get_logger().info("බෝලය මීටර් 4ක් දුර ගිහින් නැවතුණා!")
 
-            # 1. බෝලයේ Speed එක 0.5 ට වඩා වැඩි නම් (ගහපු ගමන්)
+            # 1. බෝලයේ Speed එක 0.5 ට වඩා වැඩි නම්(ගහපු ගමන්)
             if speed > 0.5 and self.nav_sm.state == 'MANUAL':
                 self.node.get_logger().info("👀 බෝලය විසි වෙනවා දැක්කා! පස්සෙන් පන්නනවා...")
                 self.nav_sm.state = 'TRACKING_VISUAL'
                 self.ball_was_moving = True
 
-            # 2. බෝලය නැවතුණාම (Speed 0 වුණාම)
+            # 2. බෝලය නැවතුණාම(Speed=0 වුණාම)
             elif self.nav_sm.state == 'TRACKING_VISUAL' and self.ball_was_moving:
                 if speed < 0.05:  
                     self.node.get_logger().info("🛑 බෝලය නැවතුණා! අරන් එන්න පිටත් වෙනවා...")
