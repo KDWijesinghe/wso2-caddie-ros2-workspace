@@ -15,7 +15,7 @@
         
 #         print("Creating Dynamic Golf Environment in MuJoCo...")
         
-#         # --- ⛳ LOAD DYNAMIC GOLF SCENE FROM XML ⛳ ---
+#         # ---  LOAD DYNAMIC GOLF SCENE FROM XML  ---
 #         import os
 #         xml_path = os.path.join(os.path.dirname(__file__), 'dynamic_golf_scene.xml')
 #         self.model = mujoco.MjModel.from_xml_path(xml_path)
@@ -148,7 +148,7 @@
                         
 #                         self.target_velocity = [vx, vy, wz]
 
-#                 # --- 📈 ACCELERATION RAMP FILTER FOR STABILITY 📈 ---
+#                 # ---  ACCELERATION RAMP FILTER FOR STABILITY  ---
 #                 ramp_rate_linear = 0.005  
 #                 ramp_rate_angular = 0.01  
                 
@@ -156,7 +156,7 @@
 #                 self.current_velocity[1] += np.clip(self.target_velocity[1] - self.current_velocity[1], -ramp_rate_linear, ramp_rate_linear)
 #                 self.current_velocity[2] += np.clip(self.target_velocity[2] - self.current_velocity[2], -ramp_rate_angular, ramp_rate_angular)
 
-#                 # --- 🎛️ INTEGRATED TERMINAL DEBUGGER (THROTTLED AT 1HZ) 🎛️ ---
+#                 # ---  INTEGRATED TERMINAL DEBUGGER (THROTTLED AT 1HZ)  ---
 #                 self.get_logger().info(
 #                     f"\n[DEBUGGER] State: {self.navigation_state} | Pos: [{robot_x:.2f}, {robot_y:.2f}] | Yaw: {robot_yaw:.2f}rad\n"
 #                     f"           Target: [{self.target_x:.2f}, {self.target_y:.2f}] (Dist: {distance:.2f}m, Err: {local_angle:.2f}rad)\n"
@@ -256,7 +256,7 @@ class Go2MujocoWalkBridge(Node):
         
         print("Creating Dynamic Golf Environment in MuJoCo...")
         
-        # --- ⛳ LOAD DYNAMIC GOLF SCENE FROM XML ⛳ ---
+        # ---  LOAD DYNAMIC GOLF SCENE FROM XML  ---
         xml_path = os.path.join(os.path.dirname(__file__), 'dynamic_golf_scene.xml')
         self.model = mujoco.MjModel.from_xml_path(xml_path)
         self.data = mujoco.MjData(self.model)
@@ -357,7 +357,7 @@ class Go2MujocoWalkBridge(Node):
                 q0, q1, q2, q3 = self.data.qpos[3:7]
                 robot_yaw = math.atan2(2.0 * (q0 * q3 + q1 * q2), 1.0 - 2.0 * (q2 * q2 + q3 * q3))
 
-                # --- 📷 SIMULATED ON-BOARD CAMERA FOV PIPELINE 📷 ---
+                # ---  SIMULATED ON-BOARD CAMERA FOV PIPELINE  ---
                 try:
                     ball_body_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_BODY, "golf_ball")
                     real_ball_x = self.data.xpos[ball_body_id][0]
@@ -438,7 +438,7 @@ class Go2MujocoWalkBridge(Node):
                         local_angle = global_heading - robot_yaw
                         local_angle = np.arctan2(np.sin(local_angle), np.cos(local_angle)) # Normalize to ±PI
                         
-                        # --- 🎯 THE ALIGNMENT LOCK FIX 🎯 ---
+                        # ---  THE ALIGNMENT LOCK FIX  ---
                         # If the ball is more than 20 degrees to the side, freeze forward walk 
                         # and rotate gracefully to face it head-on so it never flies out of camera FOV
                         if abs(local_angle) > 0.35:
@@ -471,14 +471,14 @@ class Go2MujocoWalkBridge(Node):
                             np.clip(0.5 * local_angle_home, -0.35, 0.35)
                         ]
 
-                # --- 📈 ACCELERATION RAMP FILTER FOR STABILITY ---
+                # ---  ACCELERATION RAMP FILTER FOR STABILITY ---
                 ramp_rate_linear = 0.020   
                 ramp_rate_angular = 0.040  
                 self.current_velocity[0] += np.clip(self.target_velocity[0] - self.current_velocity[0], -ramp_rate_linear, ramp_rate_linear)
                 self.current_velocity[1] += np.clip(self.target_velocity[1] - self.current_velocity[1], -ramp_rate_linear, ramp_rate_linear)
                 self.current_velocity[2] += np.clip(self.target_velocity[2] - self.current_velocity[2], -ramp_rate_angular, ramp_rate_angular)
 
-                # --- 🎛️ SYSTEM TELEMETRY DISPLAY LOGGER ---
+                # ---  SYSTEM TELEMETRY DISPLAY LOGGER ---
                 vis_status = "👁️ LOCKED ON BALL" if self.ball_is_spotted else "🔍 EXPLORING AREA"
                 self.get_logger().info(
                     f"\n[CADDIE ACTIVE HUD] State Flow : {self.navigation_state} | Vision Scope: {vis_status}\n"
