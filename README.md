@@ -1,55 +1,73 @@
-WSO2 Caddie ROS 2 Simulation
+# WSO2 Caddie ROS 2 Simulation — Setup & Usage Guide
 
-ROS 2 Jazzy simulation workspace for an autonomous robotic caddie based on the Unitree Go2 Edu MVP proposal. The stack supports twin simulation pipelines: standard Gazebo Sim with visual leg animations, and a high-fidelity MuJoCo Sim + Zenoh Middleware environment featuring custom holonomic trot kinematics.
+A ROS 2 Jazzy simulation workspace for an autonomous robotic golf caddie, based on the Unitree Go2 Edu MVP proposal.
 
-The proposal PDF is image-based, but the relevant requirements are reflected in this workspace:
+---
 
-Unitree Go2 Edu quadruped platform for terrain agility.
+## 1. Overview
 
-Autonomous course navigation using ROS 2, SLAM, and Nav2.
+This workspace simulates an autonomous robotic caddie built on the **Unitree Go2 Edu** quadruped platform. It supports **two independent simulation pipelines**:
 
-RGB-D vision with YOLO plus VLM-style scene reasoning for golf-ball tracking.
+1. **Standard Gazebo Sim** — visual leg animations, easier to run, good for navigation/perception testing.
+2. **High-fidelity MuJoCo Sim + Zenoh Middleware** — custom holonomic trot kinematics, precise leg-ground contact physics.
 
-LLM/voice command interaction.
+### Core capabilities (from the proposal)
+- Unitree Go2 Edu quadruped platform for terrain agility
+- Autonomous course navigation using ROS 2, SLAM, and Nav2
+- RGB-D vision with YOLO + VLM-style scene reasoning for golf-ball tracking
+- LLM/voice command interaction
+- Golf equipment logistics, ball retrieval, and shot analytics
+- MVP payload awareness (the bag rack is a research payload, not a production loadout)
 
-Golf equipment logistics, ball retrieval, and shot analytics.
+> The original proposal PDF is image-based; the requirements above are reflected directly in this workspace's code and packages.
 
-MVP payload awareness for Go2 Edu; the simulated bag rack represents a research payload, not a production loadout.
+---
 
-Package Layout
+## 2. Demo Screenshots
 
+<table>
+<tr>
+<td width="50%"><img src="demo/env.png" alt="Environment" /></td>
+<td width="50%"><img src="demo/if.png" alt="Interaction Flow" /></td>
+</tr>
+</table>
+
+---
+
+## 3. Package Layout
+
+```
 src/
-  go2_description/      Official Unitree Go2 URDF meshes/assets, ROS 2 packaged
-  unitree_api/          Official Unitree ROS 2 API message definitions
-  unitree_go/           Official Unitree Go2 ROS 2 message definitions
-  caddie_unitree_official/
-                        Official Unitree MuJoCo Go2 model/assets & custom Zenoh controller
-  caddie_description/   Go2 caddie URDF/Xacro and controller config
-  caddie_gazebo/        Gazebo Sim course world and ROS-GZ bridge launch
-  caddie_navigation/    SLAM Toolbox, Nav2 params, RViz config
-  caddie_perception/    YOLO/OpenCV golf-ball detector and VLM context node
-  caddie_interaction/   Vosk-style voice node and conversational router
-  caddie_core/          Main autonomous caddie orchestration node
-  caddie_control/       Optional velocity limiter / Unitree SDK adapter point
-  caddie_bringup/       One-command simulation bringup
+  go2_description/          Official Unitree Go2 URDF meshes/assets, ROS 2 packaged
+  unitree_api/               Official Unitree ROS 2 API message definitions
+  unitree_go/                 Official Unitree Go2 ROS 2 message definitions
+  caddie_unitree_official/   Official Unitree MuJoCo Go2 model/assets & custom Zenoh controller
+  caddie_description/        Go2 caddie URDF/Xacro and controller config
+  caddie_gazebo/              Gazebo Sim course world and ROS-GZ bridge launch
+  caddie_navigation/          SLAM Toolbox, Nav2 params, RViz config
+  caddie_perception/          YOLO/OpenCV golf-ball detector and VLM context node
+  caddie_interaction/         Vosk-style voice node and conversational router
+  caddie_core/                 Main autonomous caddie orchestration node
+  caddie_control/              Optional velocity limiter / Unitree SDK adapter point
+  caddie_bringup/              One-command simulation bringup
+```
 
+### Official Unitree Integration
+This workspace vendors official Unitree assets where they fit ROS 2 Jazzy / Gazebo Sim / MuJoCo:
 
-Official Unitree Integration
+| Package | Source |
+|---|---|
+| `go2_description` | Official Go2 URDF, DAE meshes, control config — [unitree_ros](https://github.com/unitreerobotics/unitree_ros) |
+| `unitree_api`, `unitree_go` | Official ROS 2 message packages (SDK2/SportMode API) — [unitree_ros2](https://github.com/unitreerobotics/unitree_ros2) |
+| `caddie_unitree_official/mujoco/go2` | Official MuJoCo Go2 XML/terrain scenes, extended with a standalone Zenoh Python controller (`run_dog.py`) — [unitree_mujoco](https://github.com/unitreerobotics/unitree_mujoco) |
+| `caddie_description/urdf/go2_caddie_official.urdf.xacro` | Extends the official Go2 body with caddie payload, RGB-D camera, lidar, IMU, and Gazebo Sim plugins |
 
-This workspace uses official Unitree project assets where they fit ROS 2 Jazzy, Gazebo Sim, and MuJoCo:
+---
 
-src/go2_description vendors the official Go2 URDF, DAE meshes, and control config from Unitree's ROS repository: https://github.com/unitreerobotics/unitree_ros
+## 3. Installation
 
-src/unitree_api and src/unitree_go vendor the official Unitree ROS 2 message packages used by the SDK2/SportMode API path: https://github.com/unitreerobotics/unitree_ros2
-
-src/caddie_unitree_official/mujoco/go2 keeps Unitree's official MuJoCo Go2 XML and terrain scenes for high-fidelity physics, extended with a standalone Zenoh Python controller bridge (run_dog.py): https://github.com/unitreerobotics/unitree_mujoco
-
-src/caddie_description/urdf/go2_caddie_official.urdf.xacro extends the official Go2 body with caddie payload, RGB-D camera, lidar, IMU, and Gazebo Sim control/sensor plugins.
-
-Install Dependencies
-
-1. Standard ROS 2 Jazzy & Gazebo Prerequisites
-
+### Step 3.1 — Standard ROS 2 Jazzy & Gazebo Prerequisites
+```bash
 sudo apt update
 sudo apt install -y \
   ros-jazzy-desktop \
@@ -63,162 +81,196 @@ sudo apt install -y \
   ros-jazzy-tf2-geometry-msgs \
   python3-colcon-common-extensions \
   python3-rosdep
+```
 
-
-2. Zenoh Middleware & MuJoCo Requirements
-
-# Install ROS 2 Zenoh RMW backend package
+### Step 3.2 — Zenoh Middleware & MuJoCo Requirements
+```bash
+# ROS 2 Zenoh RMW backend
 sudo apt install -y ros-jazzy-rmw-zenoh-cpp
 
-# Install Python requirements for standalone MuJoCo tracking
+# Python requirements for standalone MuJoCo tracking
 pip3 install mujoco mujoco-python-viewer eclipse-zenoh --break-system-packages opencv-python numpy ultralytics vosk sounddevice
+```
 
+> **Notes:**
+> - `ultralytics` is only needed for YOLO. If `yolo_model` is empty or the package is missing, the detector automatically falls back to the OpenCV white/circular golf-ball detector.
+> - `vosk` and `sounddevice` are only needed for microphone input — text commands work without them.
 
-Note: ultralytics is only needed for YOLO. If yolo_model is empty or the package is missing, the detector uses the OpenCV white/circular golf-ball fallback. vosk and sounddevice are only needed for microphone input; text commands work without them.
-
-Build
-
+### Step 3.3 — Build the Workspace
+```bash
 cd /media/nimsika/WindowsData/ros2/WSO2-caddie-project
 source /opt/ros/jazzy/setup.bash
 rosdep install --from-paths src --ignore-src -r -y
 colcon build --symlink-install
 source install/setup.bash
+```
 
+---
 
-Running Pipeline 1: Full Gazebo Simulation
+## 4. Pipeline 1 — Full Gazebo Simulation
 
+### Step 4.1 — Launch
+```bash
 ros2 launch caddie_bringup caddie_sim.launch.py
+```
 
+### Step 4.2 — Useful Launch Options
+| Option | Effect |
+|---|---|
+| `gui:=false` | Run headless (no Gazebo GUI) |
+| `use_rviz:=false` | Disable RViz |
+| `detector_backend:=opencv` | Force OpenCV fallback detector |
+| `yolo_model:=/path/to/golf_ball_yolo.pt` | Use a custom YOLO model |
+| `use_voice:=true` | Enable microphone voice input |
+| `use_unitree_sport_bridge:=true` | Enable official Unitree SportMode bridge |
+| `use_leg_animation:=false` | Disable visible leg animation |
 
-Useful Launch Options:
+Example:
+```bash
+ros2 launch caddie_bringup caddie_sim.launch.py gui:=false use_rviz:=false
+```
 
-ros2 launch caddie_bringup caddie_sim.launch.py gui:=false
-ros2 launch caddie_bringup caddie_sim.launch.py use_rviz:=false
-ros2 launch caddie_bringup caddie_sim.launch.py detector_backend:=opencv
-ros2 launch caddie_bringup caddie_sim.launch.py yolo_model:=/path/to/golf_ball_yolo.pt
-ros2 launch caddie_bringup caddie_sim.launch.py use_voice:=true
-ros2 launch caddie_bringup caddie_sim.launch.py use_unitree_sport_bridge:=true
-ros2 launch caddie_bringup caddie_sim.launch.py use_leg_animation:=false
+---
 
+## 5. Pipeline 2 — High-Fidelity MuJoCo + Zenoh Simulation
 
-Running Pipeline 2: High-Fidelity MuJoCo + Zenoh Simulation
+This mode bypasses the standard heavy simulation nodes to track precise leg-ground contacts, using custom **Omnidirectional Sine-Wave Trot Kinematics** mapped directly over standard ROS 2 `/cmd_vel` inputs, bridged through Zenoh.
 
-This mode bypasses the standard heavy simulation nodes to track precise leg-ground contacts, executing via custom Omnidirectional Sine-Wave Trot Kinematics mapped directly over standard ROS 2 /cmd_vel inputs bridged through Zenoh.
-
-Step 1: Fire up the background Zenoh Router
-
+### Step 5.1 — Start the Zenoh Router
+```bash
 ros2 run rmw_zenoh_cpp rmw_zenohd
+```
 
-
-Step 2: Spin up the MuJoCo Walk Bridge Controller
-
+### Step 5.2 — Start the MuJoCo Walk Bridge Controller
+```bash
 cd /media/nimsika/WindowsData/ros2/WSO2-caddie-project
 source install/setup.bash
 cd src/caddie_unitree_official/mujoco/go2
 python3 run_dog.py
+```
+The Go2 platform spawns in a stable horizontal stance (`Kp=160.0`, `Kd=8.0`), balancing its internal floating-base frames.
 
-
-The Go2 platform will spawn in a sturdy, stable horizontal stance ($Kp=160.0, Kd=8.0$) balancing its internal floating-base frames.
-
-Step 3: Publish Omnidirectional Velocities (Test Commands)
-
-Open another terminal window, explicitly set your RMW transport layer configuration, and fire commands:
-
-Walk Forward / Backward:
-
+### Step 5.3 — Publish Velocity Commands (New Terminal)
+Each command below requires the Zenoh RMW to be set explicitly first:
+```bash
 export RMW_IMPLEMENTATION=rmw_zenoh_cpp
+```
+
+**Walk forward / backward:**
+```bash
 ros2 topic pub --once /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.3, y: 0.0, z: 0.0}}"
+```
+*(Backward motion uses absolute `abs(vx)` scaling to protect calf clearance.)*
 
-
-(Backward paths use absolute abs(vx) scaling to protect calf clearance constraints).
-
-Lateral Side-Steps (Crab-Walking):
-
-export RMW_IMPLEMENTATION=rmw_zenoh_cpp
+**Lateral side-steps (crab-walking):**
+```bash
 ros2 topic pub --once /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.0, y: 0.2, z: 0.0}}"
+```
 
-
-Pivot Turning (Fixed Pivot Yaw Kinematics):
-
-export RMW_IMPLEMENTATION=rmw_zenoh_cpp
+**Pivot turning (fixed pivot yaw kinematics):**
+```bash
 ros2 topic pub --once /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.0, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.4}}"
+```
+*(Custom cross-mapping: left flank joints actuate sideways along Y; right flank segments stroke forward along X.)*
 
+---
 
-(Coordinated via our custom cross-mapping: Left flank joints actuate sideways along the Y-axis, while Right flank segments stroke linearly forward along the X-axis).
+## 6. Autonomous Task Commands
 
-Autonomous Task Test Commands
-
-The voice node always supports text fallback:
-
+### Text Command Topic (always available, no voice needed)
+```bash
 ros2 topic pub --once /caddie/text_command std_msgs/msg/String "{data: 'start mapping'}"
 ros2 topic pub --once /caddie/text_command std_msgs/msg/String "{data: 'retrieve nearest ball'}"
 ros2 topic pub --once /caddie/text_command std_msgs/msg/String "{data: 'list balls'}"
 ros2 topic pub --once /caddie/text_command std_msgs/msg/String "{data: 'analyze shot'}"
 ros2 topic pub --once /caddie/text_command std_msgs/msg/String "{data: 'return home'}"
 ros2 topic pub --once /caddie/text_command std_msgs/msg/String "{data: 'stop'}"
+```
 
-
-The conversational router accepts free-form text:
-
+### Free-Form Conversational Router
+```bash
 ros2 topic pub --once /caddie/conversation_text std_msgs/msg/String "{data: 'please find the closest lost golf ball'}"
 ros2 topic pub --once /caddie/conversation_text std_msgs/msg/String "{data: 'take me back to the tee box'}"
+```
 
-
-Useful Status Topics:
-
+### Status Topics to Monitor
+```bash
 ros2 topic echo /caddie/status
 ros2 topic echo /caddie/ball_detections
 ros2 topic echo /go2/gait_status
+```
 
+---
 
-Notes On The Go2 Simulation Model
+## 7. Understanding the Go2 Simulation Model
 
-The default URDF/Xacro is based on the official Unitree Go2 description. For robust Nav2 simulation it uses hidden tiny drive wheels under the body and Gazebo's diff-drive system plugin to consume /cmd_vel and publish /odom.
+- The default URDF/Xacro is based on the official Unitree Go2 description.
+- For robust Nav2 simulation, the model uses **hidden tiny drive wheels** under the body plus Gazebo's diff-drive plugin to consume `/cmd_vel` and publish `/odom`.
+- By default, the **visible legs are animated** via `gz_ros2_control`, while the hidden wheels handle actual odometry and base movement. The animated legs are **visual-only** — their feet don't strike the ground or tip the robot.
 
-By default, the visible Go2 legs are animated through gz_ros2_control while the hidden wheels remain responsible for stable odometry and base movement. The animated leg links are visual-only in Gazebo, so their moving feet do not strike the ground and tip the robot over.
+### Gait Animator Behavior
+Subscribes to `/cmd_vel`, `/odom`, and `/imu`, and adapts stride length, step frequency, stance width, and foot lift based on course surface:
 
-The gait animator subscribes to /cmd_vel, /odom, and /imu. It changes stride length, step frequency, stance width, and foot lift for the course surface under the robot:
+| Surface | Behavior |
+|---|---|
+| Fairway | Normal trot |
+| Green | Short, gentle steps |
+| Tee | Cautious startup stance |
+| Rough | Shorter stride, extra lift |
+| Sand bunker | Slower, high-clearance steps |
+| Mound/slope | Wider stance with pitch/roll compensation |
 
-fairway: normal trot
-
-green: short, gentle steps
-
-tee: cautious startup stance
-
-rough: shorter stride with extra lift
-
-sand bunkers: slower high-clearance steps
-
-mound/slope: wider stance with pitch/roll compensation
-
-To run without visible leg movement:
-
+### Disable Leg Animation
+```bash
 ros2 launch caddie_bringup caddie_sim.launch.py use_leg_animation:=false
+```
 
-
-The gait is still a visualizer, not Unitree's production locomotion controller. Tune it live after launch if you want a slower or more expressive walk:
-
+### Tune the Gait Live (After Launch)
+```bash
 ros2 param set /go2_gait_animator max_step_frequency 0.55
 ros2 param set /go2_gait_animator max_thigh_swing 0.045
 ros2 param set /go2_gait_animator max_calf_swing 0.032
 ros2 param set /go2_gait_animator trajectory_time 0.70
+```
+> Note: this gait animator is a **visualizer only** — it is not Unitree's production locomotion controller.
 
+---
 
-The optional velocity limiter remains useful when feeding commands from Nav2 or teleop:
+## 8. Optional Control Nodes
 
+### Velocity Limiter
+Useful when feeding commands from Nav2 or teleop:
+```bash
 ros2 run caddie_control go2_velocity_limiter --ros-args -p input_topic:=/cmd_vel_raw -p output_topic:=/cmd_vel
+```
 
-
-The optional Unitree SportMode bridge publishes official unitree_api/Request messages to /api/sport/request:
-
+### Unitree SportMode Bridge
+Publishes official `unitree_api/Request` messages to `/api/sport/request`:
+```bash
 ros2 run caddie_control unitree_sportmode_bridge
+```
+> ⚠️ Only use this bridge when the Unitree ROS 2 middleware or robot-side SDK agent is actually available. In Gazebo Sim, keep `use_unitree_sport_bridge:=false` unless specifically testing message flow.
 
+---
 
-Use that bridge only when the Unitree ROS 2 middleware or robot-side SDK agent is available. In Gazebo Sim, leave use_unitree_sport_bridge:=false unless you are testing the message flow.
-
-
+## 9. Quick Reference — Send a Single Test Command
+```bash
 ros2 topic pub /caddie/text_command std_msgs/msg/String "data: 'hit'" --once
-
-
+```
+Expected output:
+```
 publisher: beginning loop
 publishing #1: std_msgs.msg.String(data='hit')
+```
+
+---
+
+## 10. Recommended Quick-Start Order
+
+1. Install prerequisites (§3.1–3.2)
+2. Build workspace (§3.3)
+3. Choose a pipeline:
+   - **Gazebo (easier):** run §4.1, then send commands from §6
+   - **MuJoCo + Zenoh (high-fidelity):** run §5.1 → §5.2 → §5.3, then send commands from §6
+4. Monitor via status topics (§6)
+5. Tune gait/leg animation as needed (§7)
