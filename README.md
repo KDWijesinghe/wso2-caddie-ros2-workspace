@@ -6,6 +6,14 @@ A ROS 2 Jazzy simulation workspace for an autonomous robotic golf caddie, based 
 
 ## 1. Overview
 
+<table>
+<tr>
+<td width="50%"><img src="demo/env.png" alt="Environment" /></td>
+<td width="50%"><img src="demo/if.png" alt="Interaction Flow" /></td>
+</tr>
+</table>
+
+
 This workspace simulates an autonomous robotic caddie built on the **Unitree Go2 Edu** quadruped platform. It supports **two independent simulation pipelines**:
 
 1. **Standard Gazebo Sim** — visual leg animations, easier to run, good for navigation/perception testing.
@@ -23,18 +31,7 @@ This workspace simulates an autonomous robotic caddie built on the **Unitree Go2
 
 ---
 
-## 2. Demo Screenshots
-
-<table>
-<tr>
-<td width="50%"><img src="demo/env.png" alt="Environment" /></td>
-<td width="50%"><img src="demo/if.png" alt="Interaction Flow" /></td>
-</tr>
-</table>
-
----
-
-## 3. Package Layout
+## 2. Package Layout
 
 ```
 src/
